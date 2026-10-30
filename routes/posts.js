@@ -1,0 +1,22 @@
+const router = require('express').Router();
+const p = require('../controllers/postController');
+const c = require('../controllers/commentController');
+const { requireAuth } = require('../middleware/auth');
+const upload = require('../middleware/upload');
+const { writeLimiter } = require('../middleware/rateLimit');
+const { asyncH } = require('../utils/helpers');
+
+router.get('/', asyncH(p.list));
+router.get('/tags', asyncH(p.tags));
+router.get('/widgets', asyncH(p.widgets));
+router.get('/giphy', requireAuth, asyncH(c.giphy));
+router.get('/by-slug/:slug', asyncH(p.bySlug));
+router.post('/', requireAuth, writeLimiter, upload.array('images', 4), asyncH(p.create));
+router.put('/:id', requireAuth, writeLimiter, upload.array('images', 4), asyncH(p.update));
+router.delete('/:id', requireAuth, asyncH(p.remove));
+router.post('/:id/react', requireAuth, writeLimiter, asyncH(p.react));
+router.post('/:id/share', asyncH(p.share));
+router.post('/:id/bookmark', requireAuth, asyncH(p.bookmark));
+router.get('/:id/comments', asyncH(c.list));
+router.post('/:id/comments', requireAuth, writeLimiter, asyncH(c.create));
+module.exports = router;

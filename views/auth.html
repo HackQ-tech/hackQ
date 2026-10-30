@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Account · HackQ</title><link rel="stylesheet" href="/css/style.css"></head><body><div id="nav"></div>
+<main class="auth">
+  <aside class="auth-art" aria-hidden="true"><div class="glow"></div><div class="art-in">
+    <h2>Where hackers and builders compare notes.</h2>
+    <ul class="feat">
+      <li><span data-ic="shield" data-s="20"></span><div><b>CVEs &amp; disclosures</b><p>Track vulnerabilities and discuss the fixes.</p></div></li>
+      <li><span data-ic="flag" data-s="20"></span><div><b>CTFs &amp; events</b><p>Find the next competition, share write-ups.</p></div></li>
+      <li><span data-ic="code" data-s="20"></span><div><b>Projects &amp; tutorials</b><p>Show what you built, learn from others.</p></div></li>
+      <li><span data-ic="trophy" data-s="20"></span><div><b>Earn your rank</b><p>Newbie to Legend, one contribution at a time.</p></div></li>
+    </ul>
+    <pre class="term"><span class="p">$</span> whoami
+<span class="g">you</span>@hackq
+<span class="p">$</span> sudo join --community<span class="blink">_</span></pre>
+  </div></aside>
+
+  <section class="auth-main"><div class="acard">
+
+    <div data-view="login">
+      <h1>Welcome back</h1><p class="muted">Log in to post, comment and keep your rank.</p>
+      <div class="oauth"></div><div class="or"><span>or continue with email</span></div>
+      <form id="login" novalidate>
+        <label for="l-id">Username or email</label><div class="field"><span data-ic="user"></span><input id="l-id" name="identifier" required autocomplete="username" autofocus></div>
+        <label for="l-pw">Password <a class="right" href="/forgot-password">Forgot password?</a></label><div class="field"><span data-ic="lock"></span><input id="l-pw" name="password" type="password" required autocomplete="current-password"><button type="button" class="eye" data-eye aria-label="Show password"></button></div>
+        <p class="ferr" id="e-login" role="alert"></p><button class="btn wide">Log in</button>
+      </form>
+      <p class="swap">New to HackQ? <a href="/register">Create an account</a></p>
+    </div>
+
+    <div data-view="register" hidden>
+      <div class="steps"><i class="on"></i><i></i><i></i></div>
+      <form id="reg1" novalidate>
+        <h1>Create your account</h1><p class="muted">Step 1 of 3 · Your login details</p>
+        <div class="oauth"></div><div class="or"><span>or use your email</span></div>
+        <label for="r-user">Username</label><div class="field"><span data-ic="at"></span><input id="r-user" name="username" required minlength="3" maxlength="20" autocomplete="username" placeholder="neo_42"></div>
+        <label for="r-mail">Email</label><div class="field"><span data-ic="mail"></span><input id="r-mail" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></div>
+        <label for="r-pw">Password</label><div class="field"><span data-ic="lock"></span><input id="r-pw" name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters"><button type="button" class="eye" data-eye aria-label="Show password"></button></div>
+        <div class="meter" id="m-reg"><i></i></div><p class="hint" id="m-reg-t">Use 12+ characters with a mix of letters, numbers and symbols.</p>
+        <p class="ferr" id="e-reg1" role="alert"></p><button class="btn wide">Continue</button>
+      </form>
+      <form id="reg2" hidden novalidate>
+        <h1>About you</h1><p class="muted">Step 2 of 3 · Birthdate and profile picture</p>
+        <label for="r-bd">Birthdate <span class="muted">(you must be 13+, private by default)</span></label><div class="field"><span data-ic="calendar"></span><input id="r-bd" name="birthdate" type="date" required></div>
+        <label>Profile picture</label><div class="avatars big" id="avatars"></div>
+        <p class="ferr" id="e-reg2" role="alert"></p>
+        <div class="two"><button type="button" class="btn ghost" id="back1">Back</button><button class="btn">Create account</button></div>
+        <p class="hint">By creating an account you agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>, and to use HackQ responsibly and legally.</p>
+      </form>
+      <p class="swap">Already have an account? <a href="/login">Log in</a></p>
+    </div>
+
+    <div data-view="verify" hidden>
+      <div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+      <div class="badge-ic" data-ic="mail" data-s="26"></div>
+      <h1>Check your email</h1><p class="muted">We sent a 6-digit code to <b id="v-mail"></b>.</p>
+      <form id="verify" novalidate><div class="otp" id="otp" aria-label="Verification code"></div>
+        <p class="ferr center" id="e-verify" role="alert"></p>
+        <p class="timer" id="v-timer"></p><button class="btn wide" id="v-go">Verify email</button></form>
+      <p class="swap"><button class="link" id="resend" disabled>Resend code</button> · <a href="/login">Back to login</a></p>
+    </div>
+
+    <div data-view="forgot" hidden>
+      <div class="badge-ic" data-ic="key" data-s="26"></div>
+      <h1>Forgot your password?</h1><p class="muted">Enter your email and we'll send you a secure link to reset it.</p>
+      <form id="forgot" novalidate><label for="f-mail">Email</label><div class="field"><span data-ic="mail"></span><input id="f-mail" name="email" type="email" required autocomplete="email"></div>
+        <p class="ferr" id="e-forgot" role="alert"></p><button class="btn wide">Send reset link</button></form>
+      <p class="swap"><a href="/login"><span data-ic="arrowleft" data-s="14"></span> Back to login</a></p>
+    </div>
+
+    <div data-view="sent" hidden class="center">
+      <div class="badge-ic ok" data-ic="checkcircle" data-s="28"></div><h1>Check your inbox</h1>
+      <p class="muted">If an account exists for <b id="s-mail"></b>, a reset link is on its way. It works for 30 minutes.</p>
+      <p class="swap"><a href="/login">Back to login</a></p>
+    </div>
+
+    <div data-view="reset" hidden>
+      <div class="badge-ic" data-ic="lock" data-s="26"></div><h1>Choose a new password</h1><p class="muted">Pick something strong and unique. You'll be signed in right after.</p>
+      <form id="reset" novalidate>
+        <label for="n-pw">New password</label><div class="field"><span data-ic="lock"></span><input id="n-pw" name="password" type="password" required minlength="8" autocomplete="new-password"><button type="button" class="eye" data-eye aria-label="Show password"></button></div>
+        <div class="meter" id="m-res"><i></i></div><p class="hint" id="m-res-t"></p>
+        <label for="n-pw2">Confirm password</label><div class="field"><span data-ic="lock"></span><input id="n-pw2" name="confirm" type="password" required autocomplete="new-password"></div>
+        <p class="ferr" id="e-reset" role="alert"></p><button class="btn wide">Update password</button></form>
+      <p class="swap"><a href="/forgot-password">Link expired? Request a new one</a></p>
+    </div>
+
+    <div data-view="secure" hidden>
+      <div class="badge-ic danger" data-ic="shield" data-s="28"></div><h1>Secure your account</h1>
+      <p class="muted">This will immediately:</p>
+      <ul class="plain"><li>Sign out every device, including whoever changed your password</li><li>Lock the account until you set a new password</li></ul>
+      <p class="ferr" id="e-secure" role="alert"></p>
+      <button class="btn red wide" id="secure-go">Lock account &amp; reset password</button>
+      <p class="swap"><a href="/">This was me, no action needed</a></p>
+    </div>
+
+    <div data-view="bad" hidden class="center"><div class="badge-ic danger" data-ic="alert" data-s="28"></div><h1>Link not valid</h1><p class="muted">This link is missing, expired or already used.</p><p class="swap"><a href="/forgot-password">Request a new reset link</a></p></div>
+  </div></section>
+</main>
+<footer><nav class="flinks"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/leaderboard">Leaderboard</a><a href="/sitemap.xml">Sitemap</a></nav>HackQ · hack responsibly. Share knowledge, not harm.</footer><div id="toast"></div><script src="/js/icons.js"></script><script src="/js/common.js"></script><script src="/js/auth.js"></script></body></html>

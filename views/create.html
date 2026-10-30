@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Write · HackQ</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/vendor/hljs-theme.min.css"></head><body><div id="nav"></div>
+<main class="wrap" style="max-width:780px">
+<div id="step1"><h1>What are you posting?</h1><p class="muted">Pick a type. The form adapts so you only fill in what matters.</p><div class="types" id="types"></div></div>
+<form id="f" class="card" hidden>
+  <div class="typebar"><span id="tchip"></span><button type="button" class="link" id="chg">Change type</button></div>
+  <h2 id="h">New post</h2><p class="small muted" id="rule"></p>
+  <label for="title">Title</label><input id="title" name="title" required minlength="5" maxlength="150">
+  <label for="content">Details <span class="muted">Markdown supported, README-style. Type @ to mention someone.</span></label>
+  <div class="edtabs"><button type="button" class="on" data-m="w">Write</button><button type="button" data-m="p">Preview</button><span class="grow"></span><span class="muted small" id="cnt">0 / 50,000</span><button type="button" class="link" id="imp"></button><input type="file" id="mdfile" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden></div>
+  <textarea id="content" name="content" required maxlength="50000" class="mono" style="min-height:260px" placeholder="Write your post, or drop a README.md here"></textarea><div id="prev" class="md card" hidden></div>
+
+  <div data-for="cve"><div class="notice"><svg class="ic" width="16" height="16" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg><span>Only post <b>publicly disclosed</b> vulnerabilities that already have a CVE ID. Don't publish live exploits against unpatched systems or anything that targets specific people.</span></div>
+    <div class="row2"><div><label>CVE ID</label><input name="cveId" data-req placeholder="CVE-2024-12345"></div><div><label>Severity</label><select name="severity" data-req><option value="">Choose…</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select></div></div>
+    <div class="row2"><div><label>CVSS score (0-10, optional)</label><input name="cvss" type="number" min="0" max="10" step="0.1"></div><div><label>Affected product (optional)</label><input name="product" maxlength="100" placeholder="Apache HTTP Server 2.4.x"></div></div>
+    <label>Advisory / reference link (optional)</label><input name="reference" placeholder="https://nvd.nist.gov/vuln/detail/..."></div>
+
+  <div data-for="ctf event"><div class="row2"><div><label>Date &amp; time</label><input name="eventDate" type="datetime-local" data-req></div><div><label>Location</label><input name="location" maxlength="80" placeholder="Online, or city / venue"></div></div>
+    <label>Event link (registration / CTFtime / scoreboard)</label><input name="eventLink" placeholder="https://"></div>
+
+  <div data-for="project"><label>Project link (GitHub, live demo…)</label><input name="projectUrl" data-req placeholder="https://github.com/you/project"></div>
+  <div data-for="project tutorial"><label>YouTube link (optional)</label><input name="youtube" placeholder="https://youtu.be/..."></div>
+
+  <label>Tags (optional, up to 5)</label><div class="chips" id="tags"></div>
+  <label>Images</label><div id="old" class="keep"></div><div id="dz"></div>
+  <p style="margin-top:1.2rem"><button class="btn" id="go">Publish</button> <a class="btn ghost" href="/">Cancel</a></p>
+</form></main><footer><nav class="flinks"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/leaderboard">Leaderboard</a><a href="/sitemap.xml">Sitemap</a></nav>HackQ · hack responsibly. Share knowledge, not harm.</footer><div id="toast"></div><script src="/vendor/marked.min.js"></script><script src="/vendor/purify.min.js"></script><script src="/vendor/highlight.min.js"></script><script src="/js/icons.js"></script><script src="/js/common.js"></script><script src="/js/create.js"></script></body></html>

@@ -17,7 +17,7 @@ async function decoratePosts(posts, viewer, full = false) {
   if (viewer && ids.length) (await Reaction.find({ user: viewer._id, targetType: 'post', target: { $in: ids }, active: true }).lean()).forEach(r => { mine[r.target] = r.type; });
   const bm = new Set((viewer?.bookmarks || []).map(String));
   return posts.map(({ __v, reports, ...p }) => ({
-    ...p, length: p.content.length, content: full ? p.content : p.content.slice(0, 700), author: brief(p.author), my: mine[p._id] || null, bookmarked: bm.has(String(p._id))
+    ...p, length: p.content.length, content: full ? p.content : p.content.slice(0, 2000), author: brief(p.author), my: mine[p._id] || null, bookmarked: bm.has(String(p._id))
   }));
 }
 

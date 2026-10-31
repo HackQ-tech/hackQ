@@ -8,11 +8,12 @@ const { notify } = require('../utils/notify');
 
 exports.stats = async (req, res) => {
   const day = new Date(Date.now() - 864e5);
-  const [users, posts, pending, comments, banned, newUsers, newPosts] = await Promise.all([
+  const [users, posts, pending, comments, banned, newUsers, newPosts, bugsOpen] = await Promise.all([
     User.countDocuments(), Post.countDocuments({ status: 'approved' }), Post.countDocuments({ status: 'pending' }), Comment.countDocuments(),
-    User.countDocuments({ banned: true }), User.countDocuments({ createdAt: { $gte: day } }), Post.countDocuments({ createdAt: { $gte: day } })
+    User.countDocuments({ banned: true }), User.countDocuments({ createdAt: { $gte: day } }), Post.countDocuments({ createdAt: { $gte: day } }),
+    require('../models/BugReport').countDocuments({ status: { $in: ['open', 'in_progress'] } })
   ]);
-  res.json({ users, posts, pending, comments, banned, newUsers, newPosts });
+  res.json({ users, posts, pending, comments, banned, newUsers, newPosts, bugsOpen });
 };
 
 exports.posts = async (req, res) => {

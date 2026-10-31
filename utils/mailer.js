@@ -22,15 +22,17 @@ exports.mailMode = () => process.env.RESEND_API_KEY
   ? `Resend, sending from ${exports.parseFrom(process.env.MAIL_FROM)}`
   : 'DEV (RESEND_API_KEY is empty: emails are only printed in this console, nothing is sent)';
 
-exports.sendMail = async ({ to, subject, html, text }) => {
-  if (!exports.canEmail(to)) return { skipped: true };
+exports.sendMail = async ({ to, subject, html, text, replyTo }) => {
+  const list = [].concat(to).filter(exports.canEmail);
+  if (!list.length) return { skipped: true };
+  to = list.join(', ');
   const key = process.env.RESEND_API_KEY;
   if (!key) { console.log(`\n--- [dev mail, NOT sent] to: ${to}\n--- subject: ${subject}\n${text}\n---\n`); return { dev: true }; }
   const from = exports.parseFrom(process.env.MAIL_FROM);
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to: [to], subject, html, text })
+    body: JSON.stringify({ from, to: list, subject, html, text, ...(replyTo && exports.canEmail(replyTo) ? { reply_to: replyTo } : {}) })
   });
   const body = await r.text();
   if (!r.ok) {

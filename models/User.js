@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
   // true = visible to everyone
   privacy: { bio: pub, portfolio: pub, github: pub, interests: pub, job: pub, birthdate: { type: Boolean, default: false } },
   points: { type: Number, default: 0 },
-  stats: { posts: { type: Number, default: 0 }, comments: { type: Number, default: 0 }, reactionsGiven: { type: Number, default: 0 } },
+  stats: { posts: { type: Number, default: 0 }, comments: { type: Number, default: 0 }, reactionsGiven: { type: Number, default: 0 }, bugsFixed: { type: Number, default: 0 } },
   role: { type: String, enum: ['user', 'moderator', 'admin'], default: 'user' },
   badge: { type: String, enum: ['none', 'blue', 'gray', 'gold', 'red'], default: 'none' },
   verified: { type: Boolean, default: false },

@@ -1,0 +1,10 @@
+const router = require('express').Router();
+const b = require('../controllers/bugController');
+const { requireAuth } = require('../middleware/auth');
+const upload = require('../middleware/upload');
+const { writeLimiter } = require('../middleware/rateLimit');
+const { asyncH } = require('../utils/helpers');
+router.use(requireAuth);
+router.post('/', writeLimiter, upload.array('images', 3), asyncH(b.create));
+router.get('/mine', asyncH(b.mine));
+module.exports = router;

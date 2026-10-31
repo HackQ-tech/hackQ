@@ -22,7 +22,7 @@ const ogImage = url => (/res\.cloudinary\.com\/.+\/image\/upload\//.test(url || 
 const abs = (u, base) => !u ? `${base}/img/og-default.png` : /^https?:\/\//.test(u) ? u : base + u;
 const jsonLd = o => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
 
-// Builds the whole <head> SEO block that replaces the page's title
+// Builds the whole <head> SEO block that replaces the page's <title>
 exports.head = (m = {}) => {
   const s = site(), title = m.title || `${s.name} · Hack. Build. Share.`, desc = clip(m.description || s.desc, 200);
   const url = s.base + (m.path || '/'), img = abs(m.image, s.base), isDefaultImg = img.endsWith('/img/og-default.png');
@@ -109,6 +109,7 @@ Disallow: /api/
 Disallow: /admin
 Disallow: /settings
 Disallow: /create
+Disallow: /report-bug
 Disallow: /login
 Disallow: /register
 Disallow: /forgot-password

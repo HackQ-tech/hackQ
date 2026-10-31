@@ -5,7 +5,7 @@
   const followLabel = f => f ? `${icon('check', 14)} Following` : `${icon('userplus', 14)} Follow`;
   const r = u.rankInfo, row = (l, v) => v ? `<p class="small"><span class="muted">${l}:</span> ${v}</p>` : '';
   $('#p').innerHTML = `<div class="card prof"><img class="ava xl" src="${esc(u.avatar)}" alt=""><div style="flex:1;min-width:240px">
-    <h1>${esc(u.username)} ${badges(u)}</h1><div class="meta">${rankChip(u.rank)}<b>${u.points} pts</b><span class="muted">joined ${new Date(u.createdAt).toLocaleDateString()}</span></div>
+    <h1>${esc(u.username)} ${badges(u)}</h1><div class="meta">${rankChip(u.rank)}<b>${u.points} pts</b>${u.stats.bugsFixed ? `<span class="chip bughunter">${icon('bug', 11)} Bug hunter ×${u.stats.bugsFixed}</span>` : ''}<span class="muted">joined ${new Date(u.createdAt).toLocaleDateString()}</span></div>
     <div class="bar" style="margin:.6rem 0 .2rem"><i style="width:${r.progress}%"></i></div><p class="small muted">${r.next ? `${r.next.min - u.points} pts to ${r.next.name}` : 'Max rank reached'}</p>
     ${u.bio ? `<p>${esc(u.bio)}</p>` : ''}${row('Role', esc(u.job))}${row('Portfolio', u.portfolio && `<a href="${esc(u.portfolio)}" target="_blank" rel="noopener nofollow">${esc(u.portfolio)}</a>`)}
     ${row('GitHub', u.github && `<a href="https://github.com/${esc(u.github)}" target="_blank" rel="noopener">@${esc(u.github)}</a>`)}${row('Birthday', u.birthdate && new Date(u.birthdate).toLocaleDateString())}

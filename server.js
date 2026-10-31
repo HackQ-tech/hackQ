@@ -36,6 +36,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/bugs', require('./routes/bugs'));
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
 // HTML pages: every page goes through sendPage so crawlers and link previews get real <title>, description, Open Graph tags etc.
@@ -66,6 +67,7 @@ app.get('/u/:username', sendPage('profile.html', seo.profile));
 app.get('/settings', sendPage('settings.html', seo.noindex('Settings')));
 app.get('/leaderboard', sendPage('leaderboard.html', seo.simple('Leaderboard', 'The top hackers and builders on HackQ, ranked by points from posts, comments and reactions.', '/leaderboard')));
 app.get('/admin', sendPage('admin.html', seo.noindex('Admin')));
+app.get('/report-bug', sendPage('report-bug.html', seo.noindex('Report a bug')));
 app.get('/privacy', sendPage('privacy.html', seo.simple('Privacy Policy', 'How HackQ collects, uses and protects your personal data.', '/privacy')));
 app.get('/terms', sendPage('terms.html', seo.simple('Terms of Service', 'The rules for using HackQ: acceptable use, content, accounts and responsibilities.', '/terms')));
 app.use(sendPage('404.html', seo.notFound));

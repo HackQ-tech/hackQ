@@ -56,6 +56,9 @@ const ICON_PATHS = {
   arrowleft: '<path d="M19 12H5M12 19l-7-7 7-7"/>',
   checkcircle: '<circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/>',
   terminal: '<path d="m4 17 6-6-6-6M12 19h8"/>',
+  menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
+  sidebar: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/>',
+  bug: '<rect x="7" y="8" width="10" height="13" rx="5"/><path d="M12 8V5M9 5l1.5 1.5M15 5l-1.5 1.5M7 13H3M17 13h4M7.5 18 4 20M16.5 18l3.5 2M7.5 9 4 7M16.5 9 20 7"/>',
   inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/>'
 };
 function icon(name, size = 16, cls = '') {

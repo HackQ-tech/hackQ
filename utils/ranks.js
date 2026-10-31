@@ -7,7 +7,7 @@ const RANKS = [
   { name: 'Guru', min: 1500, dailyPosts: 5 },
   { name: 'Legend', min: 3000, dailyPosts: 10 }
 ];
-const POINTS = { post: 5, comment: 3, reactionsPerPoint: 3, autoApproveAt: 100, commentsPerDayRewarded: 10 };
+const POINTS = { post: 5, comment: 3, reactionsPerPoint: 3, autoApproveAt: 100, commentsPerDayRewarded: 10, bugReward: 1000 };
 
 function getRank(points = 0) {
   let i = 0;

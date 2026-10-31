@@ -53,3 +53,44 @@ exports.reset = (user, url) => ({
     btn(url, 'Choose a new password') + fine('This link expires in <b>30 minutes</b> and can be used once. If you did not ask for this, ignore this email, your password stays the same.<br><br>' + esc(url)) }),
   text: `Reset your HackQ password (valid 30 minutes): ${url}\nIf you did not request this, ignore this email.`
 });
+
+const SEV = { low: '#7bd88f', medium: '#ffd166', high: '#ff9f43', critical: '#ff6b6b' };
+const row = (k, v) => v ? `<tr><td style="padding:3px 14px 3px 0;color:#8d909b;vertical-align:top;white-space:nowrap">${k}</td><td style="color:#e8e6df">${v}</td></tr>` : '';
+const box = t => `<div style="margin:6px 0 14px;padding:12px 14px;background:#0b0c0e;border:1px solid #2b2e37;border-radius:6px;color:#c9c7bf;font-size:14px;line-height:1.6;white-space:pre-wrap">${esc(t)}</div>`;
+
+exports.bugAdmin = (bug, user) => ({
+  subject: `[Bug ${bug.severity.toUpperCase()}] ${bug.title}`,
+  html: layout({ preheader: `${user.username} reported: ${bug.title}`, title: 'New bug report', body:
+    `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 14px;font-size:14px">${row('Reference', `<b>${esc(bug.ref)}</b>`)}${row('Title', esc(bug.title))}${row('Severity', `<b style="color:${SEV[bug.severity]}">${esc(bug.severity)}</b>`)}${row('Category', esc(bug.category))}${row('Reporter', `${esc(user.username)} &lt;${esc(user.email)}&gt;`)}${row('Page', bug.pageUrl ? esc(bug.pageUrl) : '')}${row('Device', esc(bug.device))}${row('Screen', esc(bug.viewport))}</table>` +
+    `<p style="margin:0 0 4px;color:#8d909b;font-size:13px">Description</p>${box(bug.description)}` + (bug.steps ? `<p style="margin:0 0 4px;color:#8d909b;font-size:13px">Steps to reproduce</p>${box(bug.steps)}` : '') +
+    (bug.images?.length ? P('Screenshots:<br>' + bug.images.map(i => `<a href="${esc(i.url)}" style="color:#6cc4ff">${esc(i.url)}</a>`).join('<br>')) : '') +
+    btn(`${BASE()}/admin#bugs`, 'Review in admin panel') + fine('Reply to this email to write to the reporter directly. Marking the bug "Fixed &amp; valid" in the admin panel pays them 1000 points.') }),
+  text: `New bug report ${bug.ref} (${bug.severity}/${bug.category}) from ${user.username} <${user.email}>\n${bug.title}\n\n${bug.description}\n\nSteps: ${bug.steps || '-'}\nPage: ${bug.pageUrl || '-'}\nDevice: ${bug.device}\n\nReview: ${BASE()}/admin#bugs`
+});
+
+exports.bugReceipt = (bug, user) => ({
+  subject: `We got your bug report (${bug.ref})`,
+  html: layout({ preheader: `Thanks for reporting "${bug.title}".`, title: 'Thanks for the report', body:
+    P(`Hi <b style="color:#e8e6df">${esc(user.username)}</b>, we received your bug report and the team will look at it.`) +
+    `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 14px;font-size:14px">${row('Reference', `<b>${esc(bug.ref)}</b>`)}${row('Title', esc(bug.title))}${row('Severity', esc(bug.severity))}</table>` +
+    P('<b style="color:#ffb454">Bug bounty:</b> if your report is confirmed as a valid bug and gets fixed, you receive <b style="color:#ffb454">1000 points</b> on your profile.') +
+    P('You will get an email and a notification when the status changes. You can follow it any time under "My reports".') +
+    btn(`${BASE()}/report-bug`, 'View my reports') }),
+  text: `Thanks ${user.username}! We received your bug report ${bug.ref}: "${bug.title}". If it is confirmed valid and fixed you get 1000 points. Follow it at ${BASE()}/report-bug`
+});
+
+const STATUS_COPY = {
+  fixed: ['Your bug was fixed', 'Good news, your report was confirmed as a valid bug and it is now fixed.', true],
+  invalid: ['Update on your bug report', 'After review, we could not confirm this as a bug in HackQ.', false],
+  duplicate: ['Update on your bug report', 'This bug was already reported by someone else, so we closed it as a duplicate.', false]
+};
+exports.bugStatus = (bug, user, reward) => {
+  const [title, lead, good] = STATUS_COPY[bug.status];
+  return { subject: `${bug.status === 'fixed' ? 'Fixed: ' : 'Update: '}${bug.title} (${bug.ref})`,
+    html: layout({ preheader: good ? `+${reward} points added to your profile.` : lead, title, body:
+      P(`Hi <b style="color:#e8e6df">${esc(user.username)}</b>,`) + P(lead) + `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 14px;font-size:14px">${row('Reference', `<b>${esc(bug.ref)}</b>`)}${row('Title', esc(bug.title))}</table>` +
+      (bug.adminNote ? `<p style="margin:0 0 4px;color:#8d909b;font-size:13px">Note from the team</p>${box(bug.adminNote)}` : '') +
+      (good ? `<div style="margin:16px 0;padding:16px;border:1px solid #2b4a33;background:#14221a;border-radius:6px;text-align:center;font:700 22px 'Courier New',monospace;color:#7bd88f">+${reward} points</div>` + P('Thank you for helping make HackQ better. The points are already on your profile.') : P('Thanks anyway, reports like yours help us keep HackQ healthy.')) +
+      btn(`${BASE()}/report-bug`, 'View my reports') }),
+    text: `${title}: ${bug.title} (${bug.ref}). ${lead}${bug.adminNote ? '\nNote: ' + bug.adminNote : ''}${good ? `\n+${reward} points added to your profile.` : ''}` };
+};

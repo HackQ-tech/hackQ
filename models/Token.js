@@ -8,5 +8,5 @@ const s = new Schema({
   attempts: { type: Number, default: 0 },
   expiresAt: { type: Date, required: true }
 }, { timestamps: true });
-s.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });   // Mongo deletes expired tokens 
+s.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });   // Mongo deletes expired tokens automatically
 module.exports = mongoose.model('Token', s);

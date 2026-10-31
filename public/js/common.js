@@ -10,7 +10,7 @@ const TYPES = {
   ctf: { label: 'CTF', plural: 'CTFs', icon: 'flag', desc: 'Announce a capture-the-flag or post a write-up.' },
   event: { label: 'Event', plural: 'Events', icon: 'calendar', desc: 'Meetups, conferences and workshops.' }
 };
-const NOTIF_ICON = { mention: 'at', comment: 'comment', reply: 'reply', reaction: 'thumb', follow: 'userplus', post: 'sparkles', system: 'bell' };
+const NOTIF_ICON = { mention: 'at', comment: 'comment', reply: 'reply', reaction: 'thumb', follow: 'userplus', post: 'sparkles', system: 'bell', bug: 'bug' };
 const AVATARS = ['default', 'neon', 'cyber', 'ghost', 'robot', 'skull', 'alien'];
 
 function toast(msg, err) { const d = document.createElement('div'); if (err) d.className = 'err'; d.textContent = msg; $('#toast').append(d); setTimeout(() => d.remove(), 3500); }
@@ -35,16 +35,16 @@ function renderText(t) {            // escape first, then add a tiny safe subset
     .replace(/(https?:\/\/[^\s<]+)/g, u => `<a href="${u}" target="_blank" rel="noopener nofollow ugc">${u}</a>`);
 }
 
-// ---- Markdown (GitHub-flavoured, sanitized) ----
+//  Markdown (GitHub-flavoured, sanitized) 
 const IMG_HOST = /^(github\.com|[\w-]+\.githubusercontent\.com|img\.shields\.io|i\.imgur\.com|res\.cloudinary\.com|[\w-]+\.giphy\.com)$/;
 const slugH = t => String(t).toLowerCase().trim().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s/g, '-');
-function renderMarkdown(src) {
+function renderMarkdown(src, opts = {}) {
   const parse = (window.marked.marked || window.marked).parse;
   const dirty = parse(String(src), { gfm: true, breaks: false });
   const clean = DOMPurify.sanitize(dirty, { FORBID_TAGS: ['style', 'form', 'textarea', 'button', 'select', 'option', 'link', 'meta'], FORBID_ATTR: ['style'] });
   const tpl = document.createElement('template'); tpl.innerHTML = clean; const root = tpl.content;
   const used = {};
-  root.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(h => { let id = slugH(h.textContent), n = used[id] = (used[id] ?? -1) + 1; h.id = 'user-content-' + id + (n ? '-' + n : ''); });
+  if (!opts.preview) root.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(h => { let id = slugH(h.textContent), n = used[id] = (used[id] ?? -1) + 1; h.id = 'user-content-' + id + (n ? '-' + n : ''); });
   root.querySelectorAll('a[href]').forEach(a => {
     const h = a.getAttribute('href');
     if (h.startsWith('#')) { try { a.setAttribute('href', '#user-content-' + slugH(decodeURIComponent(h.slice(1)))); } catch {} }
@@ -66,13 +66,13 @@ function renderMarkdown(src) {
   const out = document.createElement('div'); out.append(root); return out.innerHTML;
 }
 // call after inserting rendered markdown: syntax highlighting + copy buttons
-function enhanceMd(el) {
+function enhanceMd(el, opts = {}) {
   $$('pre > code', el).forEach(code => {
     const lang = (code.className.match(/language-([\w+-]+)/) || [])[1];
     if (lang && window.hljs?.getLanguage(lang)) window.hljs.highlightElement(code);
     const pre = code.parentElement; if (pre.parentElement.classList.contains('codewrap')) return;
     const w = document.createElement('div'); w.className = 'codewrap'; pre.replaceWith(w);
-    w.innerHTML = `<button type="button" class="copy" data-copy aria-label="Copy code">${icon('copy', 14)}</button>`; w.append(pre);
+    w.innerHTML = opts.copy === false ? '' : `<button type="button" class="copy" data-copy aria-label="Copy code">${icon('copy', 14)}</button>`; w.append(pre);
     if (lang) w.insertAdjacentHTML('afterbegin', `<span class="lang">${esc(lang)}</span>`);
   });
 }
@@ -104,16 +104,26 @@ function postFacts(p) {
   if (p.type === 'tutorial' && p.youtubeId) return `<div class="facts"><span class="muted small">${icon('play', 13)} includes video</span></div>`;
   return '';
 }
+// feed card preview: the same Markdown renderer as the post page, clamped by CSS
+function cardMd(p) {
+  let t = p.content;
+  if (p.length > t.length) { const i = t.lastIndexOf('\n'); if (i > t.length * .5) t = t.slice(0, i); if ((t.match(/```/g) || []).length % 2) t += '\n```'; }
+  return (window.marked && window.DOMPurify) ? renderMarkdown(t, { preview: true }) : `<p>${esc(plainText(t).slice(0, 260))}</p>`;
+}
+const measureCard = el => { const clipped = el.dataset.trunc === '1' || el.scrollHeight > el.clientHeight + 6; el.classList.toggle('clipped', clipped); const m = el.nextElementSibling; if (m?.classList.contains('morewrap')) m.hidden = !clipped; };
+function enhanceCards() {
+  $$('.preview:not([data-done])').forEach(el => { el.dataset.done = 1; enhanceMd(el, { copy: false }); measureCard(el); el.addEventListener('load', () => measureCard(el), true); });
+}
+new MutationObserver(enhanceCards).observe(document.body, { childList: true, subtree: true });
 function postCard(p) {
   const img = p.images?.[0] ? `<img class="thumb" loading="lazy" src="${esc(p.images[0].url)}" alt="">` : '';
-  const ex = plainText(p.content), cut = ex.length > 260 || p.length > p.content.length;
   return `<article class="card post t-${esc(p.type)}"><div class="meta">${typeChip(p.type)}${userLink(p.author)}<span class="muted">${ago(p.createdAt)}</span>${p.status !== 'approved' ? `<span class="chip warn">${esc(p.status)}</span>` : ''}</div>
-  <a class="title" href="/post/${esc(p.slug)}">${esc(p.title)}</a>${postFacts(p)}<p class="excerpt">${esc(ex.slice(0, 260))}${cut ? '…' : ''}</p>${cut ? `<p class="morewrap"><a class="more" href="/post/${esc(p.slug)}">Read more</a><span class="muted small">${readMin(p.length)} min read</span></p>` : ''}${img}
+  <a class="title" href="/post/${esc(p.slug)}">${esc(p.title)}</a>${postFacts(p)}<div class="md preview" data-trunc="${p.length > p.content.length ? 1 : 0}">${cardMd(p)}</div><p class="morewrap" hidden><a class="more" href="/post/${esc(p.slug)}">Read more</a><span class="muted small">${readMin(p.length)} min read</span></p>${img}
   ${p.tags.length ? `<div class="tags">${tagChips(p.tags)}</div>` : ''}
   <div class="foot">${reactBar('post', p._id, p.reactions, p.my)}<a class="stat" href="/post/${esc(p.slug)}#comments">${icon('comment', 15)} ${p.commentCount}</a><span class="stat">${icon('eye', 15)} ${p.views}</span></div></article>`;
 }
 
-// ---- drag & drop image picker ----
+//  drag & drop image picker 
 function dropzone(root, { max = 4, maxMB = 6, multiple = true, paste = false, onChange } = {}) {
   const st = { files: [], max };
   root.classList.add('dz');
@@ -143,7 +153,7 @@ function dropzone(root, { max = 4, maxMB = 6, multiple = true, paste = false, on
   return st;
 }
 
-// ---- @mention autocomplete ----
+//  @mention autocomplete 
 function mentionable(ta) {
   if (ta._m) return; ta._m = 1;
   const box = document.createElement('div'); box.className = 'mbox'; box.hidden = true;
@@ -168,21 +178,28 @@ function mentionable(ta) {
   ta.addEventListener('blur', () => setTimeout(() => { box.hidden = true; }, 150));
 }
 
-// ---- nav ----
+//  nav 
 const ready = (async () => {
   let d = { user: null, unread: 0 };
   try { d = await api('/auth/me'); } catch {}
   window.ME = d.user; renderNav(d); return d.user;
 })();
+const drawerHTML = (user, staff) => `<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="mnav" aria-label="Menu" aria-hidden="true"><div class="dr-head"><a class="logo" href="/">Hack<span>Q</span><i>_</i></a><button class="x" data-close aria-label="Close menu">${icon('x', 20)}</button></div>
+<form class="dr-search" id="dsf"><span class="si">${icon('search', 16)}</span><input type="search" name="q" placeholder="Search posts, CVEs, tools…" aria-label="Search"></form>
+<nav class="dr-links"><a href="/">${icon('home', 18)} Home</a><a href="/leaderboard">${icon('trophy', 18)} Ranks</a>${user ? `<a href="/create">${icon('plus', 18)} New post</a><a href="/?tab=saved">${icon('bookmark', 18)} Saved posts</a>` : ''}
+<p class="dr-h">Browse</p>${Object.entries(TYPES).map(([k, T]) => `<a href="/?type=${k}">${icon(T.icon, 18)} ${T.plural}</a>`).join('')}
+<p class="dr-h">Account</p>${user ? `<a href="/u/${esc(user.username)}"><img class="ava" src="${esc(user.avatar)}" alt=""> ${esc(user.username)}</a><a href="/settings">${icon('settings', 18)} Settings</a>${staff ? `<a href="/admin">${icon('shield', 18)} Admin panel</a>` : ''}<button data-action="logout">${icon('logout', 18)} Log out</button>` : `<a href="/login">${icon('user', 18)} Log in</a><a href="/register">${icon('userplus', 18)} Sign up</a>`}
+<p class="dr-h">More</p><a href="/report-bug">${icon('bug', 18)} Report a bug</a><a href="/privacy">${icon('file', 18)} Privacy</a><a href="/terms">${icon('file', 18)} Terms</a></nav></aside>`;
 function renderNav({ user, unread }) {
   const nav = $('#nav'); if (!nav) return;
   const staff = user && ['admin', 'moderator'].includes(user.role);
-  nav.innerHTML = `<header class="nav"><div class="in"><a class="logo" href="/">Hack<span>Q</span><i>_</i></a>
+  nav.innerHTML = `<header class="nav"><div class="in"><button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">${icon('menu', 22)}</button><a class="logo" href="/">Hack<span>Q</span><i>_</i></a>
   <form id="sf"><span class="si">${icon('search', 16)}</span><input type="search" name="q" placeholder="Search posts, CVEs, tools…" aria-label="Search"></form>
   <div class="links"><a class="navl" href="/leaderboard">${icon('trophy', 16)}<span>Ranks</span></a>${user ? `<a class="btn sm" href="/create">${icon('plus', 15)} <span>Post</span></a>
   <button class="bell" id="bell" aria-label="Notifications">${icon('bell', 20)}${unread ? `<b>${unread}</b>` : ''}</button>
-  <details class="menu"><summary><img class="ava" src="${esc(user.avatar)}" alt="Account menu"></summary><div class="dd"><a href="/u/${esc(user.username)}">${icon('user', 15)} My profile</a><a href="/?tab=saved">${icon('bookmark', 15)} Saved posts</a><a href="/settings">${icon('settings', 15)} Settings</a>${staff ? `<a href="/admin">${icon('shield', 15)} Admin panel</a>` : ''}<button data-action="logout">${icon('logout', 15)} Log out</button></div></details>`
-      : '<a class="navl" href="/login">Log in</a><a class="btn sm" href="/register">Sign up</a>'}</div></div></header><div id="notif" hidden></div>`;
+  <details class="menu"><summary><img class="ava" src="${esc(user.avatar)}" alt="Account menu"></summary><div class="dd"><a href="/u/${esc(user.username)}">${icon('user', 15)} My profile</a><a href="/?tab=saved">${icon('bookmark', 15)} Saved posts</a><a href="/settings">${icon('settings', 15)} Settings</a><a href="/report-bug">${icon('bug', 15)} Report a bug</a>${staff ? `<a href="/admin">${icon('shield', 15)} Admin panel</a>` : ''}<button data-action="logout">${icon('logout', 15)} Log out</button></div></details>`
+      : '<a class="navl" href="/login">Log in</a><a class="btn sm" href="/register">Sign up</a>'}</div></div></header><div id="notif" hidden></div>${drawerHTML(user, staff)}`;
   $('#sf').onsubmit = e => { e.preventDefault(); location.href = '/?q=' + encodeURIComponent(e.target.q.value); };
 }
 document.addEventListener('click', async e => {
@@ -204,3 +221,30 @@ document.addEventListener('click', async e => {
   }
 });
 document.addEventListener('error', e => { const i = e.target; if (i.classList?.contains('ava') && !i.dataset.f) { i.dataset.f = 1; i.src = '/img/avatars/default.svg'; } }, true);
+
+//  mobile: slide-in menu (left) and slide-out sidebar (right) 
+const lockBody = () => document.body.classList.toggle('noscroll', !!($('#mnav.open') || $('.side.open')));
+function setNav(on) { const d = $('#mnav'); if (!d) return; d.classList.toggle('open', on); d.setAttribute('aria-hidden', String(!on)); $('#burger')?.setAttribute('aria-expanded', String(on)); $('#scrim').hidden = !(on || $('.side.open')); lockBody(); }
+function setSide(on) { const s = $('.side'); if (!s) return; s.classList.toggle('open', on); $('#scrim').hidden = !(on || $('#mnav.open')); lockBody(); }
+function initSide() {
+  const s = $('.side'); if (!s || s.dataset.init) return; s.dataset.init = 1;
+  s.insertAdjacentHTML('afterbegin', `<div class="side-head"><b>Discover</b><button class="x" data-close-side aria-label="Close sidebar">${icon('x', 20)}</button></div>`);
+  document.body.insertAdjacentHTML('beforeend', `<button class="fab" data-fab aria-label="Open sidebar">${icon('sidebar', 18)}<span>Discover</span></button>`);
+}
+ready.then(initSide);
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (t.closest('#burger')) return setNav(true);
+  if (t.closest('#mnav [data-close]') || t.closest('#mnav a')) return setNav(false);
+  if (t.closest('#scrim')) { setNav(false); setSide(false); return; }
+  if (t.closest('[data-fab]')) return setSide(true);
+  if (t.closest('[data-close-side]') || t.closest('.side.open a')) return setSide(false);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { setNav(false); setSide(false); } });
+document.addEventListener('submit', e => { if (e.target.id === 'dsf') { e.preventDefault(); location.href = '/?q=' + encodeURIComponent(e.target.q.value); } });
+window.matchMedia('(min-width: 861px)').addEventListener('change', e => { if (e.matches) { setNav(false); setSide(false); } });
+
+//  bug reports (shared by the report page and the admin panel) 
+const BUG_CATS = { ui: 'Layout / UI', functionality: 'Something does not work', security: 'Security issue', performance: 'Slow / performance', content: 'Content / wording', other: 'Other' };
+const BUG_ST = { open: ['Open', 'warn'], in_progress: ['In progress', 'info'], fixed: ['Fixed', 'ok'], invalid: ['Not a bug', 'bad'], duplicate: ['Duplicate', ''] };
+const bugChip = b => { const [l, c] = BUG_ST[b.status] || ['?', '']; return `<span class="chip st ${c}">${l}${b.rewarded ? ' · +1000 pts' : ''}</span>`; };

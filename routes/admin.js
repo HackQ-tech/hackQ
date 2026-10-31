@@ -13,4 +13,7 @@ router.get('/comments', requireRole('admin', 'moderator'), asyncH(a.comments));
 // Admins only: user management
 router.get('/users', requireRole('admin'), asyncH(a.users));
 router.patch('/users/:id', requireRole('admin'), asyncH(a.updateUser));
+const bug = require('../controllers/bugController');
+router.get('/bugs', requireRole('admin'), asyncH(bug.list));
+router.patch('/bugs/:id', requireRole('admin'), asyncH(bug.update));
 module.exports = router;
